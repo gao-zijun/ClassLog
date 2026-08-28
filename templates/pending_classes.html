@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}扩班审批 - ClassLog{% endblock %}
+{% block page_title %}⏳ 扩班审批{% endblock %}
+{% block content %}
+<div class="card"><h3>待审批的班级请求</h3>
+{% if pending %}
+    {% for uname, classes in pending.items() %}
+    <h4>{{ uname }}</h4>
+    <div class="table-wrapper"><table><thead><tr><th>班级</th><th>操作</th></tr></thead><tbody>
+    {% for cls in classes %}<tr><td>{{ cls }}</td><td>
+        <form method="POST" style="display:inline;"><input type="hidden" name="username" value="{{ uname }}"><input type="hidden" name="class_name" value="{{ cls }}"><button type="submit" name="action" value="approve" class="btn btn-sm">✅ 批准</button><button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">❌ 拒绝</button></form>
+    </td></tr>{% endfor %}
+    </tbody></table></div>
+    {% endfor %}
+{% else %}<p style="color:#94a3b8;">暂无待审批请求</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}日志 - ClassLog{% endblock %}
+{% block page_title %}📄 操作日志{% endblock %}
+{% block content %}
+<div class="card">
+    <h3>选择班级查看日志</h3>
+    <form method="GET" action="{{ url_for('admin.admin_logs') }}">
+        <div class="form-grid"><div class="form-group"><label>班级</label><select name="class_name" onchange="this.form.submit()"><option value="">-- 请选择班级 --</option>{% for cls in allowed_classes %}<option value="{{ cls }}" {% if cls == selected_class %}selected{% endif %}>{{ cls }}</option>{% endfor %}</select></div></div>
+    </form>
+</div>
+{% if selected_class %}
+<div class="card"><h3>📌 {{ selected_class }} 日志</h3>
+{% if logs %}<div class="table-wrapper"><table><thead><tr><th style="width:90px;">时间</th><th>记录内容</th></tr></thead><tbody>{% for log in logs %}<tr><td style="white-space:nowrap;">{{ log.time }}</td><td><strong>{{ log.class }}-{{ log.student }}</strong> {{ log.action }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty-state"><p>📭 该班级暂无记录</p></div>{% endif %}
+</div>
+{% else %}<div class="card"><div class="empty-state"><p>📋 请在上方选择一个班级查看日志</p></div></div>{% endif %}
+{% endblock %}

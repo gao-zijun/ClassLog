@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}绑定班级 - {{ target }}{% endblock %}
+{% block page_title %}📌 绑定班级：{{ target }}{% endblock %}
+{% block content %}
+<div class="card"><h3>选择班级（可多选）</h3><form method="POST"><div class="form-group"><label>按住 Ctrl 或 Shift 可多选</label><select name="classes" multiple size="10" style="min-height:200px;">{% for cls in all_classes %}<option value="{{ cls }}" {% if cls in current_classes %}selected{% endif %}>{{ cls }}</option>{% endfor %}</select></div><button type="submit" class="btn" style="margin-top:16px;">💾 保存绑定</button><a href="{{ url_for('admin.admin_users') }}" class="btn" style="background:#64748b;margin-top:16px;">取消</a></form></div>
+{% endblock %}  

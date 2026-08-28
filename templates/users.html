@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - ClassLog{% endblock %}
+{% block page_title %}👥 用户管理{% endblock %}
+{% block content %}
+<div class="card">
+    {% if key_generated %}<div class="alert-success">🔑 <strong>{{ key_user }}</strong> 的重置密钥：<code style="font-size:18px;">{{ key_generated }}</code>（30分钟有效）</div>{% endif %}
+    {% if request.args.get('msg') %}<div class="alert-success">{{ request.args.get('msg') }}</div>{% endif %}
+    <h3>所有用户</h3>
+    {% if all_users %}
+    <div class="table-wrapper"><table><thead><tr><th>用户名</th><th>姓名</th><th>密码</th><th>等级</th><th>角色</th><th>班级</th><th>操作</th></tr></thead><tbody>
+    {% for u in all_users %}<tr><td>{{ u.username }}</td><td>{{ u.name }}</td><td>{% if server_data.level >= 5 %}{{ u.password or '（空）' }}{% else %}********{% endif %}</td><td>Lv.{{ u.level }}</td><td>{{ u.role }}</td><td>{{ u.class or '-' }}</td><td><div class="actions-inline">
+        {% if server_data.level >= 5 and u.username != server_data.username %}
+        <form method="POST" action="{{ url_for('admin.admin') }}" style="display:inline;"><input type="hidden" name="action" value="change_level"><input type="hidden" name="target_username" value="{{ u.username }}"><select name="new_level">{% for l in [1,2,3,4,5] %}<option value="{{ l }}" {% if u.level==l %}selected{% endif %}>{{ l }}</option>{% endfor %}</select><button class="btn btn-sm">修改等级</button></form>
+        <a href="{{ url_for('admin.admin_bind_classes', target=u.username) }}" class="btn btn-sm" style="background:#0ea5e9;">📌 绑定班级</a>
+        <form method="POST" action="{{ url_for('admin.generate_reset_key') }}" style="display:inline;"><input type="hidden" name="target_username" value="{{ u.username }}"><button class="btn btn-sm" style="background:#f59e0b;">🔑 生成重置密钥</button></form>
+        <form method="POST" action="{{ url_for('admin.delete_user') }}" style="display:inline;" onsubmit="return confirm('确认删除用户 {{ u.username }} 吗？')"><input type="hidden" name="target_username" value="{{ u.username }}"><button class="btn btn-sm" style="background:#ef4444;">🗑️ 删除</button></form>
+        {% endif %}
+    </div></td></tr>{% endfor %}</tbody></table></div>
+    {% else %}<p style="color:#94a3b8;">暂无用户数据</p>{% endif %}
+</div>
+<style>.actions-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.btn-sm{padding:6px 12px;font-size:13px;border-radius:6px;background:var(--primary);color:white;border:none;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}.btn-sm:hover{background:var(--primary-hover)}</style>
+{% endblock %}

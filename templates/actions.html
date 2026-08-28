@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}积木管理 - ClassLog{% endblock %}
+{% block page_title %}🧩 奖励与惩罚积木{% endblock %}
+{% block content %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+{% if pending_count > 0 %}<div class="alert-success" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;">⏳ 正在分类 {{ pending_count }} 个积木，页面每3秒自动刷新</div>{% endif %}
+
+<div class="card">
+    <h3>➕ 添加新积木</h3>
+    <form method="POST" action="{{ url_for('admin.admin_actions') }}">
+        <input type="hidden" name="action" value="add_action">
+        <div class="form-grid">
+            <div class="form-group"><label>行为名称</label><input type="text" name="block_name" required placeholder="如：帮助老师搬书"></div>
+            <div class="form-group"><label>参数（可选）</label><input type="text" name="params" placeholder="例如 同学:同学姓名"></div>
+        </div>
+        <button type="submit" class="btn" style="margin-top:16px;">添加（自动分类）</button>
+        <small style="color:var(--text-light);">提交后由 AI 自动判断奖励/惩罚及子类别</small>
+    </form>
+</div>
+
+{% macro render_group(title, actions) %}
+{% if actions %}
+<div class="card"><h3>{{ title }}</h3>
+    {% set grouped = {} %}
+    {% for a in actions %}{% set sub = a.subcategory or '其他' %}{% if sub not in grouped %}{% set _ = grouped.update({sub: []}) %}{% endif %}{% set _ = grouped[sub].append(a) %}{% endfor %}
+    {% for sub, sub_actions in grouped.items() %}
+    <div class="table-wrapper"><h4>{{ sub }}</h4><table><thead><tr><th>名称</th><th>模板</th><th>参数</th><th>操作</th></tr></thead><tbody>
+    {% for a in sub_actions %}<tr><td>{{ a.name }}{% if a.status == 'pending' %} <span style="color:#f59e0b;">(分类中...)</span>{% endif %}</td><td>{{ a.template }}</td><td>{{ a.params|join(', ') or '无' }}</td><td><form method="POST" onsubmit="return confirm('确定删除该积木？')"><input type="hidden" name="action" value="delete_action"><input type="hidden" name="del_action" value="{{ loop.index0 }}"><button class="btn btn-danger btn-sm">删除</button></form></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{{ render_group('🏆 奖励', reward_actions) }}
+{{ render_group('⚠️ 惩罚', punish_actions) }}
+{{ render_group('📦 其他', other_actions) }}
+{% if pending_count > 0 %}
+<script>setTimeout(function(){ location.reload(); }, 3000);</script>
+{% endif %}
+{% endblock %}

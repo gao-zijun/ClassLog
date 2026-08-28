@@ -1,0 +1,9 @@
+{% extends "simple_base.html" %}
+{% block title %}我的日志 - ClassLog{% endblock %}
+{% block content %}
+<h2>👤 {{ student.name }} 的日志</h2>
+{% if password_msg %}<div class="msg">{{ password_msg }}</div>{% endif %}
+{% if password_error %}<div class="error">{{ password_error }}</div>{% endif %}
+<div class="card" style="margin-top:20px;"><h4>🔑 设置密码</h4><form method="POST"><input type="hidden" name="action" value="change_password"><div class="form-group"><label>新密码（6-18位数字）</label><input type="password" name="new_password" pattern="[0-9]{6,18}"></div><button type="submit" class="btn">保存密码</button></form></div>
+<div class="card" style="margin-top:20px;"><h4>📜 操作记录</h4>{% if student.records %}<ul style="list-style:none;padding:0;">{% for rec in student.records %}<li style="padding:8px 0;border-bottom:1px solid var(--border);">{{ rec.display_time }} - {{ rec.action }}</li>{% endfor %}</ul>{% else %}<p style="color:#94a3b8;">暂无记录</p>{% endif %}</div>
+{% endblock %}

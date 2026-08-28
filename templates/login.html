@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassLog 课堂管理系统</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            position: relative;
+        }
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: floatGlow 15s infinite alternate ease-in-out;
+        }
+        .bg-glow:nth-child(1) { top: -200px; left: -100px; }
+        .bg-glow:nth-child(2) { bottom: -200px; right: -100px; animation-duration: 18s; }
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 40px) scale(1.1); }
+        }
+        .bg-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            pointer-events: none;
+        }
+        .bg-lines span {
+            position: absolute;
+            display: block;
+            width: 100px;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+            animation: drift 12s infinite linear;
+        }
+        .bg-lines span:nth-child(1) { top: 20%; left: 10%; animation-duration: 10s; }
+        .bg-lines span:nth-child(2) { top: 60%; left: 80%; animation-duration: 14s; }
+        .bg-lines span:nth-child(3) { top: 80%; left: 30%; animation-duration: 16s; }
+        @keyframes drift {
+            0% { transform: translateX(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateX(-100px) rotate(45deg); opacity: 0; }
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(25px);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: box-shadow 0.3s;
+        }
+        .login-card:hover {
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,255,255,0.8) inset;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .card-glow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .login-header { text-align: center; margin-bottom: 32px; }
+        .login-header h2 {
+            font-size: 32px;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .login-header .divider {
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #a78bfa);
+            margin: 16px auto;
+            border-radius: 2px;
+        }
+        .login-header p {
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .input-group { margin-bottom: 24px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+        .input-wrapper { position: relative; }
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 15px;
+            background: #f8fafc;
+            transition: all 0.3s;
+            outline: none;
+            color: #1e293b;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #fff;
+        }
+        .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #fecaca;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.35);
+        }
+        .btn-login:active { transform: translateY(0); }
+        .links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+            font-size: 14px;
+        }
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .links a:hover {
+            color: var(--primary-dark);
+            background: rgba(99,102,241,0.08);
+        }
+        .forgot-link { text-align: center; margin-top: 12px; }
+        .forgot-link a {
+            color: #64748b;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .forgot-link a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="bg-glow"></div>
+    <div class="bg-lines">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="login-card">
+        <div class="card-glow"></div>
+        <div class="login-header">
+            <h2>📋 ClassLog</h2>
+            <div class="divider"></div>
+            <p>课堂行为管理系统</p>
+        </div>
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="input-group">
+                <label>用户名</label>
+                <div class="input-wrapper">
+                    <input type="text" name="username" placeholder="请输入用户名" required autofocus>
+                    <span class="input-icon">👤</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>密码</label>
+                <div class="input-wrapper">
+                    <input type="password" name="password" placeholder="请输入密码">
+                    <span class="input-icon">🔒</span>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">登 录</button>
+        </form>
+        <div class="links">
+            <a href="{{ url_for('auth.register') }}">注册新账号</a>
+            <span class="divider">|</span>
+            <a href="{{ url_for('auth.select_class') }}">学生登录</a>
+        </div>
+        <div class="forgot-link">
+            <a href="{{ url_for('auth.forgot_password') }}">忘记密码？</a>
+        </div>
+    </div>
+    {% include 'broadcast_check.html' %}
+</body>
+</html>

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}班级设置 - ClassLog{% endblock %}
+{% block page_title %}⚙️ 班级人数设置{% endblock %}
+{% block content %}
+<div class="card"><h3>修改应到人数</h3><form method="POST" action="{{ url_for('admin.admin') }}"><input type="hidden" name="action" value="update_class_size"><div class="form-group" style="max-width:300px;"><label>应到人数（1-100）</label><input type="number" name="class_size" min="1" max="100" value="{{ config.get('class_size',40) }}" required></div><button type="submit" class="btn" style="margin-top:16px;">💾 保存</button></form></div>
+{% endblock %}

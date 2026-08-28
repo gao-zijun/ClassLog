@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}审批管理 - ClassLog{% endblock %}
+{% block page_title %}⏳ 待审批教师{% endblock %}
+{% block content %}
+<div class="card"><h3>待审批列表</h3>
+{% if pending_approvals %}
+<div class="table-wrapper"><table><thead><tr><th>用户名</th><th>班级</th><th>操作</th></tr></thead><tbody>
+{% for p in pending_approvals %}<tr><td>{{ p.username }}</td><td>{{ p.class_name }}</td><td>
+    <form method="POST" action="{{ url_for('admin.admin') }}" style="display:inline;"><input type="hidden" name="action" value="approve_registration"><input type="hidden" name="target_username" value="{{ p.username }}"><button type="submit" name="decision" value="approve" class="btn">✅ 通过</button><button type="submit" name="decision" value="reject" class="btn btn-danger">❌ 拒绝</button></form>
+</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p style="color:#94a3b8;">暂无待审批账号</p>{% endif %}
+</div>
+{% endblock %}

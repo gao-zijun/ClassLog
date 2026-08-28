@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}视频列表 - ClassLog{% endblock %}
+{% block page_title %}🎥 已录制视频{% endblock %}
+{% block content %}
+<div class="card">
+    <h3>视频文件</h3>
+    {% if videos %}
+        <ul>
+            {% for v in videos %}
+            <li>
+                <a href="{{ url_for('admin.video_stream', filename=v) }}" target="_blank">{{ v }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color:#94a3b8;">暂无视频</p>
+    {% endif %}
+</div>
+{% endblock %}

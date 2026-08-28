@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}添加账号 - ClassLog{% endblock %}
+{% block page_title %}➕ 添加教职工账号{% endblock %}
+{% block content %}
+<div class="card"><h3>手动添加账号</h3><form method="POST" action="{{ url_for('admin.admin') }}"><input type="hidden" name="action" value="add_account">
+    <div class="form-grid">
+        <div class="form-group"><label>用户名</label><input type="text" name="new_username" required></div>
+        <div class="form-group"><label>真实姓名</label><input type="text" name="new_name" placeholder="如未填写则同用户名"></div>
+        <div class="form-group"><label>密码（8-16位）</label><input type="password" name="new_password" placeholder="留空则无密码"></div>
+        <div class="form-group"><label>角色</label><select name="new_role"><option value="admin">管理员</option><option value="recorder">记录员</option></select></div>
+        <div class="form-group"><label>等级</label><select name="new_level">{% for l in [2,3,4,5] %}<option value="{{ l }}">{{ l }}</option>{% endfor %}</select></div>
+    </div>
+    <button type="submit" class="btn" style="margin-top:16px;">创建</button></form>
+</div>
+{% endblock %}

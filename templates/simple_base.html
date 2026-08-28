@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ClassLog{% endblock %}</title>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca;
+            --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+            --danger: #ef4444; --shadow: 0 1px 3px rgba(0,0,0,0.1); --radius: 12px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter','Segoe UI','Microsoft YaHei',sans-serif; background:var(--bg); color:var(--text); display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        .container { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:40px; width:100%; max-width:480px; }
+        h2 { text-align:center; margin-bottom:24px; color:var(--primary); }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; margin-bottom:6px; font-weight:600; color:var(--text-light); }
+        input, select { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--bg); }
+        input:focus, select:focus { border-color:var(--primary); outline:none; }
+        .btn { width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; }
+        .btn:hover { background:var(--primary-hover); }
+        .error { color:var(--danger); text-align:center; margin-bottom:12px; }
+        .msg { color:#10b981; text-align:center; margin-bottom:12px; }
+        a { color:var(--primary); }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <script type="application/json" id="serverData">{{ server_data | tojson }}</script>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    {% include 'broadcast_check.html' %}
+    <script>window.SERVER = JSON.parse(document.getElementById('serverData').textContent);</script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}管理员面板 - ClassLog{% endblock %}
+{% block page_title %}🏠 管理主页{% endblock %}
+{% block content %}
+<script type="application/json" id="actionsData">{{ actions | tojson }}</script>
+
+{% if force_read_report %}
+<div class="card" style="border-left:4px solid var(--danger);">
+    <h3>📄 待读报告</h3>
+    <p style="white-space:pre-wrap;">{{ force_read_report.content[:500] }}</p>
+    <form method="POST"><input type="hidden" name="action" value="mark_read"><button type="submit" class="btn">✅ 已读</button></form>
+</div>
+{% endif %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+
+{% if student_pending %}
+<div class="card" style="border-left:4px solid var(--warning);">
+    <h3>📝 待审批学生申请</h3>
+    <div class="table-wrapper"><table><thead><tr><th>学生</th><th>教师</th><th>操作</th></tr></thead><tbody>
+    {% for p in student_pending %}<tr><td>{{ p.student_name }}</td><td>{{ p.teacher }}</td><td>
+        <form method="POST" action="{{ url_for('admin.approve_student') }}" style="display:inline;"><input type="hidden" name="index" value="{{ loop.index0 }}"><input type="hidden" name="action" value="approve"><select name="class_name" required><option value="">-- 班级 --</option>{% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select><button type="submit" class="btn">✅ 同意</button></form>
+        <form method="POST" action="{{ url_for('admin.approve_student') }}" style="display:inline;"><input type="hidden" name="index" value="{{ loop.index0 }}"><input type="hidden" name="action" value="reject"><button type="submit" class="btn btn-danger">❌ 拒绝</button></form>
+    </td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+{% endif %}
+
+{% if pw_resets %}
+<div class="card" style="border-left:4px solid var(--warning);">
+    <h3>🔑 待处理密码重置申请</h3>
+    <div class="table-wrapper"><table><thead><tr><th>用户名</th><th>时间</th><th>操作</th></tr></thead><tbody>
+    {% for req in pw_resets %}<tr><td>{{ req.username }}</td><td>{{ req.timestamp }}</td><td>
+        <form method="POST" action="{{ url_for('admin.approve_password_reset') }}" style="display:inline;"><input type="hidden" name="target_username" value="{{ req.username }}"><button type="submit" name="decision" value="approve" class="btn">✅ 同意</button><button type="submit" name="decision" value="reject" class="btn btn-danger">❌ 拒绝</button></form>
+    </td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>📝 添加课堂记录</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="add_record">
+        <div class="form-grid">
+            <div class="form-group"><label>班级</label><select name="class_name" id="classSelect">{% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>学生</label><select name="student_name" id="studentSelect">{% for cls in classes %}{% for stu in students_by_class.get(cls, []) %}<option value="{{ stu.username }}" data-class="{{ cls }}">{{ stu.name }}</option>{% endfor %}{% endfor %}</select></div>
+            <div class="form-group"><label>分类</label><select id="actionCategory" onchange="filterActions()"><option value="all">全部</option><option value="奖励">🏆 奖励</option><option value="惩罚">⚠️ 惩罚</option></select></div>
+            <div class="form-group"><label>搜索</label><input type="text" id="actionSearch" placeholder="输入关键字..." oninput="filterActions()"></div>
+            <div class="form-group"><label>行为模板</label><select name="action_type" id="actionType">{% for act in actions %}<option value="{{ act.template }}" data-category="{{ act.category }}">{{ act.template }}</option>{% endfor %}</select></div>
+        </div>
+        <div id="paramsArea" style="margin-top:12px;"></div>
+        <button type="submit" class="btn" style="margin-top:16px;">✅ 提交记录</button>
+    </form>
+</div>
+
+{% if server_data.level >= perms.ai_analysis %}
+<div class="card">
+    <h3>🤖 AI 分析</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="ai_query">
+        <div class="form-grid">
+            <div class="form-group"><label>起始时间</label><input type="datetime-local" name="date_from" required></div>
+            <div class="form-group"><label>结束时间</label><input type="datetime-local" name="date_to" required></div>
+        </div>
+        <button type="submit" class="btn" style="margin-top:16px;">🔍 选择记录发送给 AI</button>
+    </form>
+</div>
+{% endif %}
+
+{% for cls in classes %}
+<div class="card">
+    <h3>📌 {{ cls }}</h3>
+    <div class="table-wrapper"><table><thead><tr><th>学生</th><th>最近记录</th><th>操作</th></tr></thead><tbody>
+    {% for stu in students_by_class.get(cls, []) %}
+    <tr data-class="{{ cls }}" data-student="{{ stu.username }}">
+        <td><strong>{{ stu.name }}</strong></td>
+        <td class="record-preview">{% if stu.records %}{% for rec in stu.records[:3] %}<div>{{ rec.display_time }} {{ rec.action }}</div>{% endfor %}{% else %}<span style="color:#94a3b8;">暂无</span>{% endif %}</td>
+        <td>{% if stu.records %}<button class="btn btn-danger" onclick="deleteRecord('{{ cls }}','{{ stu.username }}',0)">🗑️ 删除首条</button>{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody></table></div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var actions = JSON.parse(document.getElementById('actionsData').textContent);
+    var actionSelect = document.getElementById('actionType');
+    var paramsArea = document.getElementById('paramsArea');
+    var categorySelect = document.getElementById('actionCategory');
+    var searchInput = document.getElementById('actionSearch');
+
+    function updateParams() {
+        var tpl = actionSelect.value;
+        var act = actions.find(a => a.template === tpl);
+        paramsArea.innerHTML = '';
+        if (act && act.params.length > 0) {
+            act.params.forEach((p, i) => {
+                var label = act.param_labels[i] || p;
+                paramsArea.innerHTML += `<div class="form-group" style="margin-top:8px;"><label>${label}</label><input type="text" name="param_${p}" placeholder="请输入${label}"></div>`;
+            });
+        }
+    }
+    actionSelect.addEventListener('change', updateParams);
+    updateParams();
+
+    var classSelect = document.getElementById('classSelect');
+    var studentSelect = document.getElementById('studentSelect');
+    classSelect.addEventListener('change', function() {
+        var selectedClass = this.value;
+        for (var opt of studentSelect.options) {
+            opt.style.display = opt.getAttribute('data-class') === selectedClass ? '' : 'none';
+        }
+        var firstVisible = studentSelect.querySelector(`option[data-class="${selectedClass}"]`);
+        if (firstVisible) studentSelect.value = firstVisible.value;
+    });
+    classSelect.dispatchEvent(new Event('change'));
+
+    function filterActions() {
+        var selectedCategory = categorySelect.value;
+        var searchText = searchInput.value.toLowerCase().trim();
+        var firstVisible = null;
+        for (var i = 0; i < actionSelect.options.length; i++) {
+            var opt = actionSelect.options[i];
+            var cat = opt.getAttribute('data-category');
+            var textMatch = searchText === '' || opt.textContent.toLowerCase().includes(searchText);
+            var catMatch = (selectedCategory === 'all' || cat === selectedCategory);
+            if (catMatch && textMatch) {
+                opt.style.display = '';
+                if (!firstVisible) firstVisible = opt;
+            } else {
+                opt.style.display = 'none';
+            }
+        }
+        if (actionSelect.selectedOptions[0] && actionSelect.selectedOptions[0].style.display === 'none') {
+            if (firstVisible) firstVisible.selected = true;
+        } else if (!actionSelect.selectedOptions[0] && firstVisible) {
+            firstVisible.selected = true;
+        }
+        updateParams();
+    }
+    filterActions();
+
+    function deleteRecord(cls, stu, idx) {
+        var row = document.querySelector(`tr[data-class="${cls}"][data-student="${stu}"]`);
+        var info = '学生: ' + stu + '\n班级: ' + cls;
+        if (row) {
+            var recPreview = row.querySelector('.record-preview div');
+            if (recPreview) info += '\n记录: ' + recPreview.innerText.trim();
+        }
+        if (!confirm('确认删除以下学生的首条记录？\n\n' + info)) return;
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `<input type="hidden" name="action" value="delete_record"><input type="hidden" name="class_name" value="${cls}"><input type="hidden" name="student_name" value="${stu}"><input type="hidden" name="record_index" value="${idx}">`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+{% endblock %}

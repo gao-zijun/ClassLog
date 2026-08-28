@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}导入学生 - ClassLog{% endblock %}
+{% block page_title %}📥 导入学生{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>批量导入学生</h3>
+    <form method="POST" action="{{ url_for('admin.admin') }}" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="import_students">
+        <div class="form-group">
+            <label>目标班级</label>
+            <select name="import_class" required>
+                {% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>导入方式</label>
+            <select name="input_mode" id="inputMode" onchange="toggleImport()">
+                <option value="file">文件上传 (.txt)</option>
+                <option value="manual">手动输入</option>
+            </select>
+        </div>
+        <div id="fileInput" class="form-group">
+            <label>选择文件</label>
+            <input type="file" name="student_file" accept=".txt">
+        </div>
+        <div id="manualInput" class="form-group" style="display:none;">
+            <label>学生姓名（每行一个）</label>
+            <textarea name="manual_students" rows="6" placeholder="张三&#10;李四"></textarea>
+        </div>
+        <button type="submit" class="btn" style="margin-top:16px;">导入</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleImport() {
+        var mode = document.getElementById('inputMode').value;
+        document.getElementById('fileInput').style.display = mode === 'file' ? 'block' : 'none';
+        document.getElementById('manualInput').style.display = mode === 'manual' ? 'block' : 'none';
+    }
+</script>
+{% endblock %}

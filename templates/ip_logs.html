@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}IP 日志 - ClassLog{% endblock %}
+{% block page_title %}🌐 IP 地址操作日志{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>所有 IP 及其操作记录（按最近活动排序）</h3>
+    {% if ip_logs %}
+        {% for ip, logs in ip_logs %}
+        <div style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            <div style="background:var(--bg);padding:12px 16px;font-weight:600;cursor:pointer;" onclick="toggleLogs('{{ ip }}')">
+                📍 {{ ip }}
+                <span style="float:right;color:var(--text-light);font-size:12px;">共 {{ logs|length }} 条操作</span>
+            </div>
+            <div id="logs-{{ ip }}" style="display:none;padding:12px 16px;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>时间</th><th>用户</th><th>方法</th><th>路径</th><th>User-Agent</th></tr></thead>
+                        <tbody>
+                            {% for log in logs|reverse %}
+                            <tr>
+                                <td>{{ log.time }}</td>
+                                <td>{{ log.user }}</td>
+                                <td><span style="font-weight:bold;color:var(--primary);">{{ log.method }}</span></td>
+                                <td>{{ log.path }}</td>
+                                <td style="font-size:12px;color:var(--text-light);">{{ log.user_agent }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">暂无 IP 日志</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleLogs(ip) {
+        var div = document.getElementById('logs-' + ip);
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

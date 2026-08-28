@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}重命名班级 - ClassLog{% endblock %}
+{% block page_title %}📝 重命名班级{% endblock %}
+{% block content %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+<div class="card"><h3>选择班级并输入新名称</h3><form method="POST"><div class="form-group"><label>当前班级</label><select name="old_name" required>{% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select></div><div class="form-group" style="margin-top:16px;"><label>新班级名称</label><input type="text" name="new_name" required placeholder="新名称"></div><button type="submit" class="btn" style="margin-top:16px;">重命名</button></form><p style="color:var(--text-light);margin-top:12px;">⚠️ 重命名后班级记录保持不变，教师绑定可能需要手动更新。</p></div>
+{% endblock %}

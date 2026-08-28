@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}AI 分析 - ClassLog{% endblock %}
+{% block page_title %}🤖 AI 课堂分析{% endblock %}
+{% block content %}
+<div class="card">
+    <h3>待分发的分析报告</h3>
+    {% if pending_reports %}
+    <div class="table-wrapper"><table><thead><tr><th>预览</th><th>操作</th></tr></thead><tbody>
+    {% for r in pending_reports %}<tr><td>{{ r.content }}</td><td>
+        <form method="POST" action="{{ url_for('admin.admin') }}" style="display:inline;"><input type="hidden" name="action" value="distribute_report"><input type="hidden" name="report_index" value="{{ r.index }}"><select name="distribute_level"><option value="2">2级</option><option value="3">3级</option></select><button type="submit" class="btn">分发</button></form>
+        <a href="{{ url_for('admin.show_summary', report_index=r.index) }}" class="btn" style="background:#475569;">查看完整</a>
+    </td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<p style="color:#94a3b8;">暂无待分发报告</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}功能权限 - ClassLog{% endblock %}
+{% block page_title %}🔧 功能权限设置{% endblock %}
+{% block content %}
+<div class="card"><h3>设置各功能最低可见等级</h3><form method="POST"><div class="table-wrapper"><table><thead><tr><th>功能</th><th>最低等级</th></tr></thead><tbody>{% for key, val in perms.items() %}<tr><td>{{ key }}</td><td><select name="{{ key }}">{% for l in [1,2,3,4,5] %}<option value="{{ l }}" {% if val==l %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></td></tr>{% endfor %}</tbody></table></div><button type="submit" class="btn" style="margin-top:16px;">💾 保存</button></form>{% if msg %}<div class="alert-success" style="margin-top:16px;">{{ msg }}</div>{% endif %}</div>
+{% endblock %}

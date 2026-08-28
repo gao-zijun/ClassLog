@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}账户设置 - ClassLog{% endblock %}
+{% block page_title %}🔑 账户设置{% endblock %}
+
+{% block content %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+
+<div class="card">
+    <h3>修改登录信息</h3>
+    <form method="POST" action="{{ url_for('admin.admin') }}">
+        <input type="hidden" name="action" value="change_credentials">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>新用户名</label>
+                <input type="text" name="new_username" value="{{ server_data.username }}" required>
+            </div>
+            <div class="form-group">
+                <label>新密码（8-16位）</label>
+                <input type="password" name="new_password" placeholder="留空则不修改">
+            </div>
+            <div class="form-group">
+                <label>真实姓名</label>
+                <input type="text" name="new_name" value="{{ server_data.name }}" placeholder="输入真实姓名">
+            </div>
+            <div class="form-group">
+                <label>邮箱（用于接收提醒）</label>
+                <input type="email" name="email" value="{{ server_data.email }}" placeholder="请输入邮箱">
+            </div>
+        </div>
+        <button type="submit" class="btn" style="margin-top:16px;">💾 保存登录信息</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>修改班级信息</h3>
+    <form method="POST" action="{{ url_for('admin.admin_account') }}">
+        <input type="hidden" name="action" value="update_classes">
+        <div class="form-group">
+            <label>当前绑定的班级（可多选）</label>
+            <select name="classes" multiple size="6" style="min-height: 120px;">
+                {% for cls in all_classes %}
+                <option value="{{ cls }}" {% if cls in current_classes %}selected{% endif %}>{{ cls }}</option>
+                {% endfor %}
+            </select>
+            <small style="color: var(--text-light);">按住 Ctrl 或 Shift 可多选</small>
+        </div>
+        <button type="submit" class="btn" style="margin-top:12px;">💾 更新班级</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "simple_base.html" %}
+{% block title %}选择班级 - ClassLog{% endblock %}
+{% block content %}
+<h2>📚 选择班级</h2>
+<form method="GET" action="{{ url_for('auth.select_student') }}">
+    <div class="form-group"><label>班级</label><select name="class_name" required>{% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select></div>
+    <button type="submit" class="btn">下一步</button>
+</form>
+<p style="text-align:center;margin-top:16px;"><a href="{{ url_for('auth.login') }}">返回登录</a></p>
+{% endblock %}

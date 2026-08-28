@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}贡献名单 - ClassLog{% endblock %}
+{% block page_title %}🏆 贡献名单{% endblock %}
+{% block content %}
+<div class="card"><h3>贡献者列表</h3>
+{% if credits %}
+<div class="table-wrapper"><table><thead><tr><th>姓名</th><th>贡献说明</th><th>操作</th></tr></thead><tbody>
+{% for c in credits %}<tr><td>{{ c.name }}</td><td>{{ c.contribution }}</td><td>{% if server_data.level >= 5 %}<form method="POST" onsubmit="return confirm('确定删除该贡献者？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="index" value="{{ loop.index0 }}"><button class="btn btn-danger btn-sm">🗑️ 删除</button></form>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p style="color:#94a3b8;">暂无贡献者</p>{% endif %}
+</div>
+{% if server_data.level >= 5 %}
+<div class="card"><h3>➕ 添加贡献者</h3><form method="POST"><input type="hidden" name="action" value="add"><div class="form-grid"><div class="form-group"><label>姓名</label><input type="text" name="name" required></div><div class="form-group"><label>贡献说明</label><input type="text" name="contribution" required></div></div><button type="submit" class="btn" style="margin-top:16px;">添加</button></form></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}屏幕广播 - ClassLog{% endblock %}
+{% block page_title %}📢 屏幕广播{% endblock %}
+{% block content %}
+<div class="card"><h3>发送强制广播</h3>
+    {% if error %}<div style="color:var(--danger);">{{ error }}</div>{% endif %}
+    {% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+    <form method="POST">
+        <div class="form-grid">
+            <div class="form-group"><label>选择班级</label><select name="classes" multiple size="6" id="classSelect">{% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>选择学生</label><select name="students" multiple size="6" id="studentSelect"></select></div>
+            <div class="form-group"><label>选择账户（低于当前等级）</label><select name="users" multiple size="6">{% for u in users %}<option value="{{ u.username }}">{{ u.username }} (Lv.{{ u.level }})</option>{% endfor %}</select></div>
+        </div>
+        <div class="form-group" style="margin-top:16px;"><label>广播内容</label><textarea name="message" rows="3" placeholder="请输入要广播的内容..."></textarea></div>
+        <button type="submit" class="btn" style="margin-top:16px;">📤 发送广播</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.getElementById('classSelect').addEventListener('change', function(){
+        var classes = Array.from(this.selectedOptions).map(o=>o.value);
+        var sel = document.getElementById('studentSelect'); sel.innerHTML='';
+        if(classes.length===0) return;
+        Promise.all(classes.map(c=>fetch('/broadcast/send?get_students='+encodeURIComponent(c)).then(r=>r.json())))
+            .then(results => { results.flat().forEach(s=>{ var o=document.createElement('option'); o.value=s.username; o.textContent=s.name+' ('+s.username+')'; sel.appendChild(o); }); });
+    });
+</script>
+{% endblock %}

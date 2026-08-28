@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}选择班级 - ClassLog{% endblock %}
+{% block page_title %}📚 选择你的班级{% endblock %}
+{% block content %}
+<div class="card"><h3>请选择你所教的班级</h3><p style="color:var(--text-light);">前两个班级立即生效，添加更多需要管理员审批。</p>
+    <form method="POST">
+        <div id="class-list">
+            <div class="form-group"><label>班级 1</label><select name="classes">{% for cls in all_classes %}<option value="{{ cls }}" {% if existing[0]==cls %}selected{% endif %}>{{ cls }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>班级 2</label><select name="classes">{% for cls in all_classes %}<option value="{{ cls }}" {% if existing[1]==cls %}selected{% endif %}>{{ cls }}</option>{% endfor %}</select></div>
+        </div>
+        <button type="button" class="btn" id="add-more" style="margin-top:12px;">➕ 添加更多班级</button>
+        <div class="form-group" style="margin-top:20px;"><label>您的真实姓名</label><input type="text" name="real_name" value="{{ current_name }}" required></div>
+        <button type="submit" class="btn" style="margin-top:16px;">💾 保存</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.getElementById('add-more').addEventListener('click', function(){
+        var cnt = document.querySelectorAll('#class-list select').length + 1;
+        var div = document.createElement('div'); div.className = 'form-group';
+        div.innerHTML = `<label>班级 ${cnt}</label><select name="classes">{% for cls in all_classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}</select>`;
+        document.getElementById('class-list').appendChild(div);
+    });
+</script>
+{% endblock %}

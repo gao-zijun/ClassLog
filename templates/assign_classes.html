@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}分配班级 - ClassLog{% endblock %}
+{% block page_title %}📌 分配班级{% endblock %}
+{% block content %}
+<div class="card"><h3>选择需要强制选班的用户</h3>
+    {% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+    <form method="POST">
+        <div style="margin-bottom:12px;"><button type="button" class="btn" onclick="document.querySelectorAll('.user-check').forEach(c=>c.checked=true)">全选</button> <button type="button" class="btn btn-danger" onclick="document.querySelectorAll('.user-check').forEach(c=>c.checked=false)">取消全选</button></div>
+        <div class="table-wrapper"><table><thead><tr><th><input type="checkbox" id="checkAll" onchange="document.querySelectorAll('.user-check').forEach(c=>c.checked=this.checked)"></th><th>用户名</th><th>等级</th><th>角色</th></tr></thead><tbody>
+        {% for uname in targets %}<tr><td><input type="checkbox" name="users" value="{{ uname }}" class="user-check"></td><td>{{ uname }}</td><td>{{ staff[uname].get('level',0) }}</td><td>{{ staff[uname].get('role','') }}</td></tr>{% endfor %}
+        </tbody></table></div>
+        <button type="submit" class="btn" style="margin-top:16px;">📤 发送选班通知</button>
+    </form>
+</div>
+{% endblock %}

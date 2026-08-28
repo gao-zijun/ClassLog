@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}视频录制 - ClassLog{% endblock %}
+{% block page_title %}🎥 课堂视频录制{% endblock %}
+{% block content %}
+<div class="card"><h3>录制摄像头</h3><div style="text-align:center;"><video id="preview" autoplay muted style="width:100%;max-width:640px;border-radius:8px;"></video><video id="recorded" controls style="display:none;margin-top:12px;width:100%;max-width:640px;border-radius:8px;"></video></div><div style="margin-top:16px;display:flex;gap:12px;justify-content:center;"><button id="startBtn" class="btn">🔴 开始录制</button><button id="stopBtn" class="btn" style="background:#64748b;" disabled>⏹️ 停止录制</button></div><div id="status" style="text-align:center;margin-top:12px;color:#64748b;">准备就绪</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+    let mediaRecorder, chunks=[];
+    const preview=document.getElementById('preview'), recorded=document.getElementById('recorded'), startBtn=document.getElementById('startBtn'), stopBtn=document.getElementById('stopBtn'), statusDiv=document.getElementById('status');
+    async function start(){try{const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});preview.srcObject=stream;mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm'});mediaRecorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};mediaRecorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});recorded.src=URL.createObjectURL(blob);recorded.style.display='block';preview.style.display='none';upload(blob);stream.getTracks().forEach(t=>t.stop())};chunks=[];mediaRecorder.start();startBtn.disabled=true;stopBtn.disabled=false;statusDiv.textContent='🔴 录制中...'}catch{statusDiv.textContent='摄像头或麦克风权限被拒绝'}}
+    function stop(){if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();startBtn.disabled=false;stopBtn.disabled=true;statusDiv.textContent='上传中...'}}
+    async function upload(blob){const formData=new FormData();formData.append('video',blob,'recording.webm');try{const res=await fetch('/video/upload-web',{method:'POST',body:formData});const data=await res.json();statusDiv.textContent=data.status==='ok'?'✅ 视频已加密保存：'+data.filename:'❌ 上传失败：'+data.error}catch{statusDiv.textContent='网络错误'}}
+    startBtn.addEventListener('click',start);stopBtn.addEventListener('click',stop);
+</script>
+{% endblock %}
