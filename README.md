@@ -173,7 +173,9 @@ python run.py
 
 ## 📧 联系方式
 
-- 项目地址：`https://github.com/你的用户名/ClassLog`
+- 项目地址：`https://github.com/gao-zijun/ClassLog`
+- 电子邮箱-个人：`gao18510303466@outlook.com`
+- 电子游戏-项目：`classlogpro@outlook.com`
 - 问题反馈：请在仓库 Issues 中提交
 
 ---
