@@ -146,10 +146,7 @@ def init_default_data(conn):
     cur = conn.execute("SELECT COUNT(*) FROM staff")
     if cur.fetchone()[0] == 0:
         default_staff = [
-            ("admin", "gao201343", "admin", 5, "管理员", "", "[]", 0, 0, ""),
-            ("kfzh", "", "recorder", 2, "记录员", "", "[]", 0, 0, ""),
-            ("zhang", "zhang123", "admin", 3, "章老师", "", "[]", 0, 0, ""),
-            ("test", "12345678", "admin", 4, "测试账户", "", "[]", 0, 1, ""),
+            ("admin", "admin123", "admin", 5, "管理员", "", "[]", 0, 0, ""),
         ]
         conn.executemany('''INSERT INTO staff (username, password, role, level, name, class, classes, must_select_classes, test_account, email)
                             VALUES (?,?,?,?,?,?,?,?,?,?)''', default_staff)
