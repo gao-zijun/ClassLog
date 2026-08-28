@@ -77,30 +77,92 @@ ClassLog 是一套专为中小学晚自习、课堂管理场景设计的**课堂
 
 ```
 ClassLog/
-├── run.py                  # 启动入口
-├── requirements.txt        # 依赖列表
-├── deepseek.key            # DeepSeek API Key（需自行创建）
-├── doubao.key              # 豆包 API Key（需自行创建）
-├── fullchain.pem           # SSL 证书（可选）
-├── privkey.pem             # SSL 私钥（可选）
+├── run.py
+├── requirements.txt
+├── .gitignore
+├── LICENSE
+├── deepseek.key                  # 需手动创建，写入 DeepSeek API Key
+├── doubao.key                    # 需手动创建，写入豆包 API Key
+├── fullchain.pem                 # SSL 证书（可选，放在根目录）
+├── privkey.pem                   # SSL 私钥（可选，放在根目录）
+├── credits.json                  # 贡献名单数据（系统自动生成）
+├── AppDate/                      # 数据目录（系统自动创建）
+│   ├── staff.json                # 教职工账户数据
+│   ├── actions.json              # 行为积木数据
+│   ├── config.json               # 系统配置（含SMTP、功能权限、TOTP密钥）
+│   ├── reports.json              # AI 报告
+│   ├── read_status.json          # 已读状态
+│   ├── pending_approvals.json    # 教师注册审批
+│   ├── student_pending_approvals.json # 学生注册审批
+│   ├── pending_class_requests.json    # 扩班请求
+│   ├── password_reset_requests.json   # 密码重置申请
+│   ├── reset_keys.json           # 重置密钥
+│   ├── audit_logs.json           # IP 操作日志
+│   └── 班级文件夹/                # 每个班级一个文件夹（如“初一12班”）
+│       └── students.json         # 该班学生数据及记录
+├── log/                          # 运行日志（可选）
+├── video_storage/                # 加密视频文件（.vidat）
 ├── python_package/
-│   ├── config.py           # 路径与常量配置
-│   ├── models.py           # 数据模型与读写（JSON）
-│   ├── helpers.py          # 辅助函数与上下文注入
-│   ├── decorators.py       # 权限装饰器
-│   ├── ntp.py              # NTP 时间同步
-│   ├── ai.py               # AI 调用（DeepSeek + 豆包）
-│   ├── export.py           # 导出表格/图片/ZIP
-│   ├── video.py            # 视频加密
-│   ├── email_utils.py      # 邮件发送
-│   ├── broadcast.py        # 广播兼容路由
-│   ├── auth_routes.py      # 登录/注册/忘记密码
-│   ├── admin_routes.py     # 管理员路由
-│   ├── recorder_routes.py  # 记录员路由
-│   ├── student_routes.py   # 学生路由
-│   ├── api_routes.py       # 广播/噪音/反馈等 API
-│   └── main.py             # 应用入口与托盘
-└── templates/              # HTML 模板
+│   ├── __init__.py
+│   ├── config.py
+│   ├── models.py
+│   ├── helpers.py
+│   ├── decorators.py
+│   ├── ntp.py
+│   ├── ai.py
+│   ├── export.py
+│   ├── video.py
+│   ├── email_utils.py
+│   ├── broadcast.py
+│   ├── auth_routes.py
+│   ├── admin_routes.py
+│   ├── recorder_routes.py
+│   ├── student_routes.py
+│   ├── api_routes.py
+│   └── main.py
+└── templates/
+    ├── base.html
+    ├── simple_base.html
+    ├── intro.html
+    ├── login.html
+    ├── register.html
+    ├── select_class.html
+    ├── select_student.html
+    ├── student_select.html
+    ├── student_password.html
+    ├── forgot_password.html
+    ├── admin.html
+    ├── recorder.html
+    ├── student.html
+    ├── logs.html
+    ├── users.html
+    ├── actions.html
+    ├── ai.html
+    ├── ai_select.html
+    ├── approvals.html
+    ├── addstaff.html
+    ├── assign_classes.html
+    ├── select_classes.html
+    ├── pending_classes.html
+    ├── bind_classes.html
+    ├── config.html
+    ├── export_password.html
+    ├── feature_permissions.html
+    ├── video_record.html
+    ├── video_list.html
+    ├── broadcast.html
+    ├── broadcast_send.html
+    ├── broadcast_view.html
+    ├── show_summary.html
+    ├── feedback.html
+    ├── feature_request.html
+    ├── honor_bank.html
+    ├── rename_class.html
+    ├── credits.html
+    ├── email_settings.html
+    ├── ip_logs.html
+    └── 404.html
+    └── broadcast_check.html
 ```
 
 ---
