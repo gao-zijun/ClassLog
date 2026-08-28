@@ -1,0 +1,53 @@
+# ========== Python 缓存 ==========
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ========== 虚拟环境 ==========
+venv/
+env/
+.venv/
+ENV/
+
+# ========== 数据与运行时文件 ==========
+AppDate/
+log/
+video_storage/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# ========== 密钥与证书（绝不上传） ==========
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.jks
+deepseek.key
+doubao.key
+video_key.key
+*.tmp
+*.corrupt
+
+# ========== 导出文件（可选） ==========
+export/
+*.xlsx
+*.zip
+*.png   # 如果你不希望图片导出被跟踪，可取消注释下一行
+# *.png
+
+# ========== 系统与编辑器 ==========
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+.ftp
+
+# ========== 日志 ==========
+*.log
