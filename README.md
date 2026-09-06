@@ -176,6 +176,7 @@ ClassLog/
 
 ### 安装依赖
 -使用阿里云加速进行安装python扩展库
+
 ```bash
 pip install flask waitress pystray pillow requests openpyxl cryptography markdown ntplib opencv-python numpy openai matplotlib pandas pyzipper -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 ```
@@ -187,6 +188,7 @@ pip install flask waitress pystray pillow requests openpyxl cryptography markdow
 
 ### 启动系统
 -方法一、需要在文件目录的cmd或其他终端
+
 ```bash
 python run.py
 ```
