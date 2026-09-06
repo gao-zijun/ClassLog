@@ -175,6 +175,7 @@ ClassLog/
 - 可选：OpenSSL（用于证书转换）
 
 ### 安装依赖
+-使用阿里云加速进行安装python扩展库
 ```bash
 pip install flask waitress pystray pillow requests openpyxl cryptography markdown ntplib opencv-python numpy openai matplotlib pandas pyzipper -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 ```
@@ -185,6 +186,7 @@ pip install flask waitress pystray pillow requests openpyxl cryptography markdow
 - `doubao.key`：写入火山方舟（豆包）API Key
 
 ### 启动系统
+-方法一、需要在文件目录的cmd或其他终端
 ```bash
 python run.py
 ```
@@ -222,6 +224,7 @@ python run.py
 
 感谢以下人员为 ClassLog 做出的贡献：
 - 高梓骏（项目发起人 & 主开发者）
+- 李梓瑞（后期数据归类）
 
 （可在系统中“贡献名单”页面动态维护）
 
@@ -229,7 +232,7 @@ python run.py
 
 ## 📄 许可证
 
-本项目采用**自定义许可证**：允许个人、教育和内部管理用途使用、修改，但禁止商业用途及未经授权的修改版分发。详见 `LICENSE` 文件。
+本项目采用**自定义许可证**：允许个人内部管理用途使用、修改，但禁止商业和大型场所等非个人用途及未经授权电子合同授权的修改版分发。详见 `LICENSE` 文件。
 
 ---
 
