@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassLog 课堂管理系统</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f1f5f9;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter','Segoe UI','Microsoft YaHei',sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        .story {
+            text-align: left;
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            color: var(--text);
+            line-height: 1.8;
+        }
+        .story p {
+            margin-bottom: 10px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        .footer a.cert {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+        .footer a.cert:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 ClassLog</h1>
+        <p class="subtitle">课堂行为管理系统</p>
+
+        <div class="story">
+            <p><strong>系统起源</strong></p>
+            <p>在一个普通的晚自习中，老师需要手动记录学生的课堂行为，过程繁琐且浪费时间。为了解决这个问题，ClassLog 应运而生。</p>
+            <p>经过多人的开发与迭代，ClassLog 已发展成为一套完整的课堂管理系统，支持行为记录、AI 分析、屏幕广播、邮件提醒等功能，帮助教师更高效地管理课堂。</p>
+        </div>
+
+        <a href="{{ url_for('auth.login') }}" class="btn">进入系统</a>
+
+        <div class="footer">
+            <p>© 2026 ClassLog 开发团队 | 当前版本 v1.0</p>
+            <a class="cert" href="/cert/install" target="_blank" rel="noopener noreferrer">🔐 SSL 证书安装指南</a>
+        </div>
+    </div>
+</body>
+</html>

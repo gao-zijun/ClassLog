@@ -1,16 +1,399 @@
 {% extends "base.html" %}
 {% block title %}视频录制 - ClassLog{% endblock %}
 {% block page_title %}🎥 课堂视频录制{% endblock %}
+
 {% block content %}
-<div class="card"><h3>录制摄像头</h3><div style="text-align:center;"><video id="preview" autoplay muted style="width:100%;max-width:640px;border-radius:8px;"></video><video id="recorded" controls style="display:none;margin-top:12px;width:100%;max-width:640px;border-radius:8px;"></video></div><div style="margin-top:16px;display:flex;gap:12px;justify-content:center;"><button id="startBtn" class="btn">🔴 开始录制</button><button id="stopBtn" class="btn" style="background:#64748b;" disabled>⏹️ 停止录制</button></div><div id="status" style="text-align:center;margin-top:12px;color:#64748b;">准备就绪</div></div>
+<div class="card">
+    <h3>录制摄像头</h3>
+    <div style="text-align:center;">
+        <div style="position:relative; display:inline-block; width:100%; max-width:960px;">
+            <video id="preview" autoplay muted playsinline
+                   style="width:100%; border-radius:8px; display:block; background:#000;"></video>
+            <canvas id="overlay"
+                    style="position:absolute; top:0; left:0; width:100%; height:100%;
+                           pointer-events:none; border-radius:8px;"></canvas>
+        </div>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; align-items:center;">
+        <button id="startBtn" class="btn">🔴 开始录制</button>
+        <button id="stopBtn" class="btn" style="background:#64748b;" disabled>⏹️ 停止录制</button>
+        <button id="popupBtn" class="btn" style="background:#0ea5e9;">🪟 弹出录制小窗</button>
+    </div>
+
+    <div id="status" style="text-align:center; margin-top:12px; color:#64748b;">
+        准备就绪。开始录制后，可以新开标签页继续操作其他功能。
+    </div>
+</div>
+
+<div class="card">
+    <h3>📊 实时状态</h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px;">
+        <div style="background:#f1f5f9; padding:14px; border-radius:8px; text-align:center;">
+            <div style="font-size:12px; color:#64748b; margin-bottom:4px;">当前采集分辨率</div>
+            <div id="statRes" style="font-size:20px; font-weight:700; color:#4f46e5;">—</div>
+        </div>
+        <div style="background:#f1f5f9; padding:14px; border-radius:8px; text-align:center;">
+            <div style="font-size:12px; color:#64748b; margin-bottom:4px;">当前采集帧率</div>
+            <div id="statFps" style="font-size:20px; font-weight:700; color:#4f46e5;">—</div>
+        </div>
+        <div style="background:#f1f5f9; padding:14px; border-radius:8px; text-align:center;">
+            <div style="font-size:12px; color:#64748b; margin-bottom:4px;">检测频率</div>
+            <div id="statDetectFps" style="font-size:20px; font-weight:700; color:#22c55e;">—</div>
+        </div>
+        <div style="background:#f1f5f9; padding:14px; border-radius:8px; text-align:center;">
+            <div style="font-size:12px; color:#64748b; margin-bottom:4px;">检测到人数</div>
+            <div id="statFaces" style="font-size:20px; font-weight:700; color:#22c55e;">0</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>⚙️ 参数设置</h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+
+        <!-- 采集参数 -->
+        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:16px;">
+            <div style="font-weight:700; margin-bottom:14px; color:#4f46e5; font-size:15px;">📷 采集参数</div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>采集分辨率</label>
+                <select id="captureRes">
+                    <option value="640x480">640 × 480</option>
+                    <option value="1280x720">1280 × 720 (HD)</option>
+                    <option value="1920x1080">1920 × 1080 (FHD)</option>
+                    <option value="2560x1440">2560 × 1440 (2K)</option>
+                    <option value="3840x2160" selected>3840 × 2160 (4K)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>采集帧率</label>
+                <select id="captureFps">
+                    <option value="5">5 fps</option>
+                    <option value="10">10 fps</option>
+                    <option value="15">15 fps</option>
+                    <option value="30" selected>30 fps</option>
+                </select>
+            </div>
+            <small style="color:#94a3b8;">修改采集参数需停止录制后重新开始才生效</small>
+        </div>
+
+        <!-- 检测参数 -->
+        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:16px;">
+            <div style="font-weight:700; margin-bottom:14px; color:#4f46e5; font-size:15px;">👁️ 检测参数（实时生效）</div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>灵敏度 <span id="sensitivityVal" style="color:#4f46e5; font-weight:700;">0.30</span></label>
+                <input type="range" id="sensitivity" min="0.1" max="0.9" step="0.05" value="0.3"
+                       style="width:100%; padding:0; height:6px;">
+                <small style="color:#94a3b8;">数值越低越灵敏（0.10 = 最灵敏，0.90 = 最严格）</small>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>检测分辨率</label>
+                <select id="detectSize">
+                    <option value="320x240">320 × 240（最快）</option>
+                    <option value="480x360">480 × 360</option>
+                    <option value="640x480" selected>640 × 480（推荐）</option>
+                    <option value="800x600">800 × 600</option>
+                    <option value="960x720">960 × 720（最准，最慢）</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>检测间隔 <span id="intervalVal" style="color:#4f46e5; font-weight:700;">80</span> ms</label>
+                <input type="range" id="detectInterval" min="50" max="500" step="10" value="80"
+                       style="width:100%; padding:0; height:6px;">
+                <small style="color:#94a3b8;">越小越流畅，但 CPU 占用越高</small>
+            </div>
+
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                <input type="checkbox" id="detectToggle" checked> 显示人脸检测框
+            </label>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
 {% block scripts %}
+<script src="/static/mediapipe/face_detection/face_detection.js"></script>
 <script>
-    let mediaRecorder, chunks=[];
-    const preview=document.getElementById('preview'), recorded=document.getElementById('recorded'), startBtn=document.getElementById('startBtn'), stopBtn=document.getElementById('stopBtn'), statusDiv=document.getElementById('status');
-    async function start(){try{const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});preview.srcObject=stream;mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm'});mediaRecorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};mediaRecorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});recorded.src=URL.createObjectURL(blob);recorded.style.display='block';preview.style.display='none';upload(blob);stream.getTracks().forEach(t=>t.stop())};chunks=[];mediaRecorder.start();startBtn.disabled=true;stopBtn.disabled=false;statusDiv.textContent='🔴 录制中...'}catch{statusDiv.textContent='摄像头或麦克风权限被拒绝'}}
-    function stop(){if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();startBtn.disabled=false;stopBtn.disabled=true;statusDiv.textContent='上传中...'}}
-    async function upload(blob){const formData=new FormData();formData.append('video',blob,'recording.webm');try{const res=await fetch('/video/upload-web',{method:'POST',body:formData});const data=await res.json();statusDiv.textContent=data.status==='ok'?'✅ 视频已加密保存：'+data.filename:'❌ 上传失败：'+data.error}catch{statusDiv.textContent='网络错误'}}
-    startBtn.addEventListener('click',start);stopBtn.addEventListener('click',stop);
+(function () {
+    'use strict';
+
+    // ================= 状态 =================
+    var mediaRecorder = null;
+    var stream = null;
+    var tempFilename = null;
+    var faceDetection = null;
+    var detecting = false;
+    var detectFrameCount = 0;
+    var lastFpsTime = Date.now();
+
+    // 检测用降采样 canvas（尺寸动态可调）
+    var detectCanvas = document.createElement('canvas');
+    detectCanvas.width = 640;
+    detectCanvas.height = 480;
+    var detectCtx = detectCanvas.getContext('2d');
+
+    // ================= DOM =================
+    var preview    = document.getElementById('preview');
+    var overlay    = document.getElementById('overlay');
+    var startBtn   = document.getElementById('startBtn');
+    var stopBtn    = document.getElementById('stopBtn');
+    var popupBtn   = document.getElementById('popupBtn');
+    var statusDiv  = document.getElementById('status');
+    var detectToggle = document.getElementById('detectToggle');
+    var overlayCtx = overlay.getContext('2d');
+
+    var captureRes      = document.getElementById('captureRes');
+    var captureFps      = document.getElementById('captureFps');
+    var sensitivity     = document.getElementById('sensitivity');
+    var sensitivityVal  = document.getElementById('sensitivityVal');
+    var detectSize      = document.getElementById('detectSize');
+    var detectInterval  = document.getElementById('detectInterval');
+    var intervalVal     = document.getElementById('intervalVal');
+
+    var statRes       = document.getElementById('statRes');
+    var statFps       = document.getElementById('statFps');
+    var statDetectFps = document.getElementById('statDetectFps');
+    var statFaces     = document.getElementById('statFaces');
+
+    // ================= 参数读取 =================
+    function getCaptureConstraints() {
+        var parts = captureRes.value.split('x');
+        return {
+            video: {
+                width:  { exact: parseInt(parts[0]) },
+                height: { exact: parseInt(parts[1]) },
+                frameRate: { ideal: parseInt(captureFps.value) }
+            },
+            audio: true
+        };
+    }
+
+    // ================= 人脸检测 =================
+    async function initFaceDetector() {
+        if (faceDetection) return faceDetection;
+        if (typeof FaceDetection === 'undefined') {
+            console.error('[人脸检测] FaceDetection 未定义');
+            return null;
+        }
+        faceDetection = new FaceDetection({
+            locateFile: function (file) {
+                return '/static/mediapipe/face_detection/' + file;
+            }
+        });
+        faceDetection.setOptions({
+            model: 'full',
+            minDetectionConfidence: parseFloat(sensitivity.value)
+        });
+        faceDetection.onResults(onFaceResults);
+        return faceDetection;
+    }
+
+    function onFaceResults(results) {
+        var w = preview.videoWidth;
+        var h = preview.videoHeight;
+        if (!w || !h) return;
+
+        if (overlay.width !== w || overlay.height !== h) {
+            overlay.width = w;
+            overlay.height = h;
+        }
+        overlayCtx.clearRect(0, 0, w, h);
+
+        var detections = results.detections || [];
+        statFaces.textContent = detections.length;
+
+        var scale = w / 1280;
+        overlayCtx.lineWidth = Math.max(3, 3 * scale);
+        overlayCtx.strokeStyle = '#22c55e';
+        overlayCtx.font = 'bold ' + Math.max(18, 20 * scale) + 'px sans-serif';
+        overlayCtx.fillStyle = '#22c55e';
+
+        detections.forEach(function (d, i) {
+            var box = d.boundingBox;
+            if (!box) return;
+            var x  = box.xCenter * w - (box.width * w) / 2;
+            var y  = box.yCenter * h - (box.height * h) / 2;
+            var bw = box.width  * w;
+            var bh = box.height * h;
+            overlayCtx.strokeRect(x, y, bw, bh);
+            overlayCtx.fillText('Person ' + (i + 1), x + 8, y - 12);
+        });
+    }
+
+    function startDetectLoop() {
+        if (detecting) return;
+        detecting = true;
+        detectFrameCount = 0;
+        lastFpsTime = Date.now();
+        detectLoop();
+    }
+
+    async function detectLoop() {
+        if (!detecting) return;
+        var fd = await initFaceDetector();
+
+        if (fd && preview.readyState >= 2 && preview.videoWidth > 0) {
+            // 把 4K 帧降到小尺寸再检测
+            detectCtx.drawImage(preview, 0, 0, detectCanvas.width, detectCanvas.height);
+            try {
+                await fd.send({ image: detectCanvas });
+            } catch (e) { /* 忽略单帧错误 */ }
+
+            // 统计检测频率
+            detectFrameCount++;
+            var now = Date.now();
+            if (now - lastFpsTime >= 1000) {
+                statDetectFps.textContent = detectFrameCount + ' fps';
+                detectFrameCount = 0;
+                lastFpsTime = now;
+            }
+        }
+        if (detecting) setTimeout(detectLoop, parseInt(detectInterval.value));
+    }
+
+    function stopDetectLoop() {
+        detecting = false;
+        if (overlay.width && overlay.height) {
+            overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+        }
+        statDetectFps.textContent = '—';
+        statFaces.textContent = '0';
+    }
+
+    // ================= 录制 =================
+    async function startRecording() {
+        try {
+            statusDiv.textContent = '📷 正在启动摄像头...';
+
+            var constraints = getCaptureConstraints();
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+                console.warn('[录制] 指定的分辨率失败，回退到 1080p:', e.message);
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+                    audio: true
+                });
+            }
+
+            var track = stream.getVideoTracks()[0];
+            var s = track.getSettings();
+            console.log('[录制] 实际分辨率:', s.width + 'x' + s.height, '@', s.frameRate + 'fps');
+            statRes.textContent = s.width + ' × ' + s.height;
+            statFps.textContent = (s.frameRate || '?') + ' fps';
+
+            preview.srcObject = stream;
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+            var res = await fetch('/video/start-recording', { method: 'POST' });
+            var data = await res.json();
+            tempFilename = data.filename;
+
+            mediaRecorder.ondataavailable = async function (e) {
+                if (e.data.size > 0) await uploadChunk(e.data);
+            };
+            mediaRecorder.onstop = async function () {
+                stream.getTracks().forEach(function (t) { t.stop(); });
+                stopDetectLoop();
+                statRes.textContent = '—';
+                statFps.textContent = '—';
+                await finishRecording();
+            };
+
+            mediaRecorder.start(1000);
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            captureRes.disabled = true;
+            captureFps.disabled = true;
+
+            statusDiv.textContent = '🔴 录制中... 可最小化或打开新标签页';
+            if (detectToggle.checked) startDetectLoop();
+        } catch (err) {
+            console.error('[录制] 失败:', err);
+            statusDiv.textContent = '摄像头启动失败：' + err.message;
+        }
+    }
+
+    function uploadChunk(blob) {
+        if (!tempFilename) return;
+        var formData = new FormData();
+        formData.append('chunk', blob);
+        formData.append('filename', tempFilename);
+        return fetch('/video/upload-chunk', { method: 'POST', body: formData })
+            .catch(function (err) {});
+    }
+
+    async function finishRecording() {
+        if (!tempFilename) return;
+        var formData = new FormData();
+        formData.append('filename', tempFilename);
+        try {
+            var res = await fetch('/video/finish-recording', { method: 'POST', body: formData });
+            var data = await res.json();
+            statusDiv.textContent = data.status === 'ok'
+                ? '✅ 视频已保存：' + data.filename
+                : '❌ 保存失败：' + (data.error || '未知错误');
+        } catch (e) {
+            statusDiv.textContent = '网络错误';
+        }
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        captureRes.disabled = false;
+        captureFps.disabled = false;
+        tempFilename = null;
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            startBtn.disabled = true;
+            stopBtn.disabled = true;
+            statusDiv.textContent = '正在保存视频...';
+        }
+    }
+
+    function openRecorderWindow() {
+        window.open(window.location.href, 'ClassLog录制窗口',
+            'width=500,height=400,left=100,top=100,resizable=yes,scrollbars=yes');
+    }
+
+    // ================= 参数联动 =================
+    // 灵敏度：实时生效
+    sensitivity.addEventListener('input', function () {
+        var v = parseFloat(this.value);
+        sensitivityVal.textContent = v.toFixed(2);
+        if (faceDetection) {
+            faceDetection.setOptions({ minDetectionConfidence: v });
+        }
+    });
+
+    // 检测分辨率：立即调整 canvas
+    detectSize.addEventListener('change', function () {
+        var p = this.value.split('x');
+        detectCanvas.width = parseInt(p[0]);
+        detectCanvas.height = parseInt(p[1]);
+    });
+
+    // 检测间隔：实时读取（在 detectLoop 里每次都会读 detectInterval.value）
+    detectInterval.addEventListener('input', function () {
+        intervalVal.textContent = this.value;
+    });
+
+    // 开关检测
+    detectToggle.addEventListener('change', function () {
+        if (this.checked) { if (stream) startDetectLoop(); }
+        else { stopDetectLoop(); }
+    });
+
+    // ================= 事件绑定 =================
+    startBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+    popupBtn.addEventListener('click', openRecorderWindow);
+})();
 </script>
 {% endblock %}

@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 {% block title %}积木管理 - ClassLog{% endblock %}
 {% block page_title %}🧩 奖励与惩罚积木{% endblock %}
+
 {% block content %}
 {% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
-{% if pending_count > 0 %}<div class="alert-success" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;">⏳ 正在分类 {{ pending_count }} 个积木，页面每3秒自动刷新</div>{% endif %}
 
+{% if pending_count > 0 %}
+<div class="alert-success" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;">
+    ⏳ 正在分类 {{ pending_count }} 个积木，页面每3秒自动刷新
+</div>
+{% endif %}
+
+{% if is_admin %}
 <div class="card">
     <h3>➕ 添加新积木</h3>
     <form method="POST" action="{{ url_for('admin.admin_actions') }}">
@@ -14,27 +21,80 @@
             <div class="form-group"><label>参数（可选）</label><input type="text" name="params" placeholder="例如 同学:同学姓名"></div>
         </div>
         <button type="submit" class="btn" style="margin-top:16px;">添加（自动分类）</button>
-        <small style="color:var(--text-light);">提交后由 AI 自动判断奖励/惩罚及子类别</small>
+        <small style="color:var(--text-light);">提交后由 AI 自动判断分类</small>
     </form>
 </div>
+{% endif %}
 
-{% macro render_group(title, actions) %}
+{% macro render_group(title, actions, editable) %}
 {% if actions %}
-<div class="card"><h3>{{ title }}</h3>
+<div class="card">
+    <h3>{{ title }}</h3>
     {% set grouped = {} %}
-    {% for a in actions %}{% set sub = a.subcategory or '其他' %}{% if sub not in grouped %}{% set _ = grouped.update({sub: []}) %}{% endif %}{% set _ = grouped[sub].append(a) %}{% endfor %}
+    {% for a in actions %}
+        {% set sub = a.subcategory or '其他' %}
+        {% if sub not in grouped %}{% set _ = grouped.update({sub: []}) %}{% endif %}
+        {% set _ = grouped[sub].append(a) %}
+    {% endfor %}
     {% for sub, sub_actions in grouped.items() %}
-    <div class="table-wrapper"><h4>{{ sub }}</h4><table><thead><tr><th>名称</th><th>模板</th><th>参数</th><th>操作</th></tr></thead><tbody>
-    {% for a in sub_actions %}<tr><td>{{ a.name }}{% if a.status == 'pending' %} <span style="color:#f59e0b;">(分类中...)</span>{% endif %}</td><td>{{ a.template }}</td><td>{{ a.params|join(', ') or '无' }}</td><td><form method="POST" onsubmit="return confirm('确定删除该积木？')"><input type="hidden" name="action" value="delete_action"><input type="hidden" name="del_action" value="{{ loop.index0 }}"><button class="btn btn-danger btn-sm">删除</button></form></td></tr>{% endfor %}
-    </tbody></table></div>
+    <div class="table-wrapper" style="margin-bottom:20px;">
+        <h4>{{ sub }}</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>模板</th>
+                    <th>参数</th>
+                    {% if editable and is_admin %}<th>修改分类</th>{% endif %}
+                    {% if is_admin %}<th>操作</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in sub_actions %}
+                <tr>
+                    <td>{{ a.name }}{% if a.status == 'pending' %} <span style="color:#f59e0b;">(分类中...)</span>{% endif %}</td>
+                    <td>{{ a.template }}</td>
+                    <td>{{ a.params|join(', ') or '无' }}</td>
+                    {% if editable and is_admin %}
+                    <td>
+                        <form method="POST" style="display:flex;gap:4px;align-items:center;" onsubmit="return confirm('确认修改该积木的分类吗？')">
+                            <input type="hidden" name="action" value="edit_action">
+                            <input type="hidden" name="edit_index" value="{{ loop.index0 }}">
+                            <select name="new_category" required>
+                                <option value="奖励" {% if a.category=='奖励' %}selected{% endif %}>奖励</option>
+                                <option value="惩罚" {% if a.category=='惩罚' %}selected{% endif %}>惩罚</option>
+                                <option value="在校表现" {% if a.category=='在校表现' %}selected{% endif %}>在校表现</option>
+                                <option value="其他" {% if a.category not in ['奖励','惩罚','在校表现'] %}selected{% endif %}>其他</option>
+                            </select>
+                            <input type="text" name="new_subcategory" placeholder="子类别" value="{{ a.subcategory }}">
+                            <button class="btn btn-sm">保存</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                    {% if is_admin %}
+                    <td>
+                        <form method="POST" onsubmit="return confirm('确定删除该积木？')">
+                            <input type="hidden" name="action" value="delete_action">
+                            <input type="hidden" name="del_action" value="{{ loop.index0 }}">
+                            <button class="btn btn-danger btn-sm">删除</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% endfor %}
 </div>
 {% endif %}
 {% endmacro %}
 
-{{ render_group('🏆 奖励', reward_actions) }}
-{{ render_group('⚠️ 惩罚', punish_actions) }}
-{{ render_group('📦 其他', other_actions) }}
+{{ render_group('🏆 奖励', reward_actions, server_data.level >= 4) }}
+{{ render_group('⚠️ 惩罚', punish_actions, server_data.level >= 4) }}
+{{ render_group('📋 在校表现', performance_actions, server_data.level >= 4) }}
+{{ render_group('📦 其他', other_actions, server_data.level >= 4) }}
+
 {% if pending_count > 0 %}
 <script>setTimeout(function(){ location.reload(); }, 3000);</script>
 {% endif %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}AI 报告 - {{ report.class_name }}{% endblock %}
+{% block page_title %}📄 AI 报告：{{ report.class_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="color:var(--text-light); margin-bottom:16px;">
+        日期：{{ report.date }} &nbsp;|&nbsp; 生成时间：{{ report.time }}
+    </div>
+    <div class="markdown-content">{{ content_html | safe }}</div>
+</div>
+<div style="margin-top:16px;">
+    <a href="{{ url_for('admin.admin') }}" class="btn">← 返回管理主页</a>
+    <a href="{{ url_for('admin.admin_ai_reports_history') }}" class="btn" style="background:#64748b;">查看历史报告</a>
+</div>
+{% endblock %}

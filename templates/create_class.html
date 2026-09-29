@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}新建班级 - ClassLog{% endblock %}
+{% block page_title %}➕ 新建班级{% endblock %}
+
+{% block content %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+<div class="card">
+    <h3>创建新班级</h3>
+    <form method="POST">
+        <div class="form-group">
+            <label>班级名称</label>
+            <input type="text" name="class_name" placeholder="例如：初二5班" required>
+            <small style="color:var(--text-light);">名称不能包含 \ / : * ? " &lt; &gt; | 等字符</small>
+        </div>
+        <button type="submit" class="btn" style="margin-top:16px;">创建</button>
+    </form>
+</div>
+{% endblock %}  

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}AI 报告历史 - ClassLog{% endblock %}
+{% block page_title %}📚 AI 报告历史{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3>所有历史报告</h3>
+    {% if reports %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>日期</th><th>时间</th><th>班级</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+                {% for r in reports %}
+                <tr>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.time }}</td>
+                    <td>{{ r.class_name }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.admin_ai_report', date_str=r.date, class_name=r.class_name) }}"
+                           class="btn">📄 查看</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">暂无历史报告</div>
+    {% endif %}
+</div>
+{% endblock %}

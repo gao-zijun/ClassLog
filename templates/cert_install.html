@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassLog 根证书安装指南</title>
+<style>
+  :root { --primary: #4f46e5; --bg: #f5f6fa; --card: #ffffff; --text: #1f2937; --muted: #6b7280; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .card {
+    background: var(--card); border-radius: 14px; padding: 28px 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06); margin-bottom: 20px;
+  }
+  h1 { font-size: 24px; margin: 0 0 8px; color: var(--primary); }
+  h2 { font-size: 18px; margin: 28px 0 12px; padding-left: 10px; border-left: 4px solid var(--primary); }
+  p, li { color: var(--text); font-size: 15px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .btn {
+    display: inline-block; padding: 12px 26px; margin: 8px 0;
+    background: var(--primary); color: #fff; text-decoration: none;
+    border-radius: 10px; font-weight: 600; transition: .2s;
+  }
+  .btn:hover { background: #4338ca; transform: translateY(-1px); }
+  .warn {
+    background: #fff7ed; border-left: 4px solid #f59e0b;
+    padding: 14px 18px; border-radius: 8px; margin: 16px 0;
+    font-size: 14px; color: #92400e;
+  }
+  .ok {
+    background: #ecfdf5; border-left: 4px solid #10b981;
+    padding: 14px 18px; border-radius: 8px; margin: 16px 0;
+    font-size: 14px; color: #065f46;
+  }
+  code {
+    background: #f3f4f6; padding: 2px 7px; border-radius: 5px;
+    font-family: Consolas, Monaco, monospace; font-size: 13px; color: #be185d;
+  }
+  ol, ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+  .steps li { margin: 10px 0; }
+  .back { display:inline-block; margin-top: 10px; color: var(--primary); text-decoration: none; font-size: 14px; }
+  .back:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h1>🔐 ClassLog 根证书安装指南</h1>
+    <p class="muted">ClassLog 使用自签名 SSL 证书（mkcert 生成），浏览器默认不信任它，会显示"不安全"警告。安装根证书后，即可正常访问，不再弹警告。</p>
+
+    {% if ca_exists %}
+      <a class="btn" href="/cert/rootCA.crt" download>⬇️ 下载 rootCA.crt</a>
+      <p class="muted">文件名：rootCA.crt &nbsp;|&nbsp; 有效期至 2028-12-20</p>
+    {% else %}
+      <div class="warn">⚠️ 服务器未找到 <code>rootCA.crt</code>，请联系管理员将文件放到程序根目录。</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>第一次怎么打开这个页面？</h2>
+    <p>因为还没装证书，浏览器会拦截。请按下面操作强行进入一次：</p>
+    <ol class="steps">
+      <li>在浏览器地址栏输入 <code>https://10.1.2.41</code>，回车。</li>
+      <li>出现"您的连接不是私密连接"页面，点击 <b>「高级」</b>。</li>
+      <li>点击 <b>「继续前往 10.1.2.41（不安全）」</b>。</li>
+      <li>此时就能看到本页面，下载证书并安装。</li>
+      <li>安装完成后，<b>彻底关闭浏览器再重新打开</b>，警告就消失了。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🪟 Windows 安装方法</h2>
+    <ol class="steps">
+      <li>下载 <code>rootCA.crt</code>。</li>
+      <li><b>双击</b>该文件 → 点击「安装证书」。</li>
+      <li>存储位置选择 <b>「当前用户」</b>（推荐）或「本地计算机」。</li>
+      <li>点击「下一步」→ 选择 <b>「将所有的证书都放入下列存储」</b>。</li>
+      <li>点击「浏览」→ 选择 <b>「受信任的根证书颁发机构」</b> → 确定。</li>
+      <li>一路「下一步」→「完成」→ 弹出安全警告点「是」。</li>
+      <li>重启浏览器生效。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🍎 macOS 安装方法</h2>
+    <ol class="steps">
+      <li>下载 <code>rootCA.crt</code>，双击打开，会自动导入「钥匙串访问」。</li>
+      <li>在「系统」或「登录」钥匙串中找到 <b>mkcert development CA</b>。</li>
+      <li>双击它 → 展开「信任」→ 将 <b>「使用此证书时」</b> 设为 <b>「始终信任」</b>。</li>
+      <li>关闭窗口，输入开机密码确认。</li>
+      <li>重启 Safari / Chrome 生效。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>📱 iOS / iPadOS 安装方法</h2>
+    <ol class="steps">
+      <li>用 Safari 打开本页，点击下载 <code>rootCA.crt</code>。</li>
+      <li>弹出「此网站正尝试下载一个配置描述文件」→ 点击「允许」。</li>
+      <li>进入 <b>设置 → 通用 → VPN与设备管理</b>，找到已下载的描述文件，点击「安装」。</li>
+      <li>再进入 <b>设置 → 通用 → 关于本机 → 证书信任设置</b>。</li>
+      <li>找到 <b>mkcert development CA</b>，把开关 <b>打开</b>（信任）。</li>
+      <li>重启 Safari 生效。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🤖 Android 安装方法</h2>
+    <ol class="steps">
+      <li>下载 <code>rootCA.crt</code>（会存到「下载」文件夹）。</li>
+      <li>进入 <b>设置 → 安全 → 加密与凭据 → 安装证书 → CA 证书</b>。</li>
+      <li>弹出警告点「仍然安装」。</li>
+      <li>选择刚才下载的 <code>rootCA.crt</code> 文件。</li>
+      <li>系统会提示「已安装 CA 证书」。</li>
+      <li><b>注意：</b>Chrome 等浏览器可能仍不信任用户安装的证书，建议使用系统自带浏览器或 Firefox 访问。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>❓ 常见问题</h2>
+    <ul>
+      <li><b>装完还是提示不安全？</b> → 彻底关闭浏览器（不是关标签页）再重新打开；Windows 上可运行 <code>certmgr.msc</code> 检查证书是否在「受信任的根证书颁发机构 → 证书」里。</li>
+      <li><b>访问 IP 变了怎么办？</b> → 证书里已包含 <code>127.0.0.1</code>、<code>10.1.2.41</code>、<code>localhost</code>，换其他 IP 需要重新生成证书。</li>
+      <li><b>证书到期了？</b> → 有效期至 2028-12-20，到期前联系管理员用 mkcert 重新签发。</li>
+      <li><b>能不能不装证书？</b> → 可以，每次点「高级 → 继续前往」即可，但体验较差。</li>
+    </ul>
+
+    <div class="ok">✅ 安装完成后，重新访问 <code>https://10.1.2.41</code> 或 <code>https://127.0.0.1</code>，地址栏会显示锁形图标，不再有警告。</div>
+
+    <a class="back" href="/">← 返回首页</a>
+  </div>
+
+</div>
+</body>
+</html>

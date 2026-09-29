@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}数据备份 - ClassLog{% endblock %}
+{% block page_title %}💾 数据备份{% endblock %}
+
+{% block extra_head %}
+<!-- 把验证 URL 放在 meta 里，避免 <script> 内出现 Jinja 表达式 -->
+<meta name="backups-verify-url" content="/admin/backups/verify">
+{% endblock %}
+
+{% block content %}
+{% if msg %}<div class="alert-success">{{ msg }}</div>{% endif %}
+
+<div class="card">
+    <h3>备份列表</h3>
+    <p style="color:var(--text-light); margin-bottom:16px;">
+        系统每天 <b>7:00</b>、<b>12:00</b>、<b>18:00</b> 自动备份 AppData。<br>
+        备份文件使用 <b>AES 加密</b>，密码 16 位随机生成，点击「查看密码」需验证您的登录密码。
+    </p>
+    {% if backups %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>备份时间</th>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>密码</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in backups %}
+                <tr>
+                    <td style="white-space:nowrap;">{{ b.time }}</td>
+                    <td><code style="font-size:12px;">{{ b.filename }}</code></td>
+                    <td>{{ b.size_display }}</td>
+                    <td>
+                        <span id="pwd-{{ loop.index0 }}"
+                              style="display:none; font-family:Consolas,monospace; background:#f3f4f6; padding:3px 10px; border-radius:6px; color:#4f46e5; font-weight:600;"></span>
+                        <button id="btn-{{ loop.index0 }}"
+                                class="btn btn-sm view-pwd-btn"
+                                data-filename="{{ b.filename }}"
+                                data-idx="{{ loop.index0 }}">
+                            👁️ 查看密码
+                        </button>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin.admin_backups_download', filename=b.filename) }}"
+                           class="btn btn-sm" style="background:#0ea5e9; text-decoration:none;">⬇️ 下载</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">📭 暂无备份</div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>手动备份</h3>
+    <p style="color:var(--text-light);">立即创建一次备份（7:00 / 12:00 / 18:00 也会自动执行）。</p>
+    <form method="POST" action="{{ url_for('admin.admin_backups_create') }}">
+        <button type="submit" class="btn" style="margin-top:12px;">💾 立即备份</button>
+    </form>
+</div>
+
+<style>
+    .btn-sm { padding:6px 12px; font-size:13px; border-radius:6px; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var VERIFY_URL = document.querySelector('meta[name="backups-verify-url"]').content;
+
+    document.querySelectorAll('.view-pwd-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            showPassword(this.dataset.filename, this.dataset.idx);
+        });
+    });
+
+    window.showPassword = async function (filename, idx) {
+        var pwd = prompt('请输入您的登录密码以查看备份密码：');
+        if (pwd === null) return;
+        if (!pwd) { alert('密码不能为空'); return; }
+        try {
+            var resp = await fetch(VERIFY_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'password=' + encodeURIComponent(pwd) +
+                      '&filename=' + encodeURIComponent(filename)
+            });
+            var data = await resp.json();
+            if (!data.ok) {
+                alert(data.msg || '验证失败');
+                return;
+            }
+            var el = document.getElementById('pwd-' + idx);
+            el.textContent = data.password;
+            el.style.display = 'inline';
+            document.getElementById('btn-' + idx).style.display = 'none';
+        } catch (e) {
+            alert('网络错误：' + e.message);
+        }
+    };
+})();
+</script>
+{% endblock %}

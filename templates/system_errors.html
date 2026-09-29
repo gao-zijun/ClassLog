@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}系统错误日志 - ClassLog{% endblock %}
+{% block page_title %}🛠️ 系统错误日志{% endblock %}
+
+{% block content %}
+{% if request.args.get('msg') %}<div class="alert-success">{{ request.args.get('msg') }}</div>{% endif %}
+
+<div class="card">
+    <h3>最近错误（最多 100 条）</h3>
+    {% if errors %}
+    <form method="POST" action="{{ url_for('admin.clear_system_errors') }}" style="margin-bottom:16px;" onsubmit="return confirm('确认清空所有错误日志？')">
+        <button type="submit" class="btn btn-danger">🗑️ 清空日志</button>
+    </form>
+    {% for e in errors %}
+    <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">
+        <div style="font-weight:600;color:var(--danger);">{{ e.time }} — {{ e.path }} ({{ e.method }})</div>
+        <div style="color:var(--text-light);font-size:13px;margin-top:4px;">用户：{{ e.user }}</div>
+        <div style="margin-top:6px;"><strong>错误：</strong>{{ e.error }}</div>
+        <details style="margin-top:8px;">
+            <summary style="cursor:pointer;color:var(--primary);">查看详细信息</summary>
+            <pre style="background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;font-size:12px;margin-top:8px;">{{ e.traceback }}</pre>
+        </details>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">✅ 暂无系统错误</div>
+    {% endif %}
+</div>
+{% endblock %}
